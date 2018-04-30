@@ -14,8 +14,9 @@
     </form>
     <hr />
     <ul class="todoLists">
-        <% if(todoList < 1) %>
+        <% if(todoList < 1){ %>
             <p>Todo list is empty...</p>
+        <% } %>
         <% todoList.forEach(function(todo){ %>
             <li><%= todo.title %> 
                 <form action="/remove/<%= todo.id %>" method="post"><input type="submit" value="Done"></form>
