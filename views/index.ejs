@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Todo Lists</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    <h1><%= userName %>'s Todo List</h1>
+    <form action="/new" method="post">
+        <input name="todo_title" placeholder="Title"/><br />
+        <input type="submit" value="Save New">
+    </form>
+    <hr />
+    <ul class="todoLists">
+        <% if(todoList < 1) %>
+            <p>Todo list is empty...</p>
+        <% todoList.forEach(function(todo){ %>
+            <li><%= todo.title %> 
+                <form action="/remove/<%= todo.id %>" method="post"><input type="submit" value="Done"></form>
+            </li>
+        <% }); %>
+    </ul>
+    <hr />
+    <a href="/logout">Log Out</a>
+</body>
+</html>
