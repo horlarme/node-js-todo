@@ -138,6 +138,5 @@ app.get("/install", function(req, res){
 });
 
 app.listen(3000, function(){
-    this.hostname = 'dev.kraks';
     console.log("Listening on port 3000");
 });
