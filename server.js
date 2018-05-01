@@ -3,8 +3,14 @@ const ejs = require("ejs");
 const app = server();
 const mysql = require("mysql");
 const bodyParser = require('body-parser');
+const session = require("express-session");
 
 app.use(bodyParser.urlencoded({ extended: true }));
+app.set('trust proxy', 1);
+app.use(session({
+    secret: "rfesdthigunkmgjhpuolmd",
+    resave: false
+}));
 
 const mysqlConnection = mysql.createConnection({
     host: "localhost",
@@ -14,6 +20,8 @@ const mysqlConnection = mysql.createConnection({
 });
 
 const tableCreateList = "CREATE TABLE lists(id int not null auto_increment primary key, title text, description text, status boolean)";
+const tableCreateUser = "CREATE TABLE users(id int not null auto_increment primary key, userName varchar(15), password varchar(30))";
+const addForeignKeyToList = "ALTER TABLE `lists` add `user_id` int unsigned NOT NULL";
 const getTodoListAll = "SELECT id,title,description from lists where status is true";
 
 try{
@@ -24,23 +32,79 @@ try{
 
 app.set("view engine", "ejs");
 
-app.get("/", function (req, res){
+var prot = function(req, res, next){
+    if(undefined == req.session.userID || 
+        req.session.userID == false ||
+        req.session.userID == "")
+        {
+            return res.redirect("/");
+        }
+
+    next();
+}
+
+var protAuth = function(req, res, next){
+    console.log(req.session.userID);
+    if(req.session.userID){
+        return res.redirect("/todos");
+    }
+    next();
+}
+
+app.get("/", protAuth, function(req, res){
+    res.render("login", {err: false});
+});
+
+app.post("/", protAuth, function(req, res){
+    mysqlConnection.query("select id, userName from users where username = '" + req.body.userName + "' and password = '" + req.body.password +"'", function (err, result){
+        if(err) {
+            return res.send('Something went wrong');
+        }else{
+            if(result.length != 1){
+                return res.render("login", {err: "Either the password or user name is wrong, check again!"});
+            }
+            req.session.userID = result[0].id;
+            return res.redirect('/todos');
+        }
+    });
+});
+
+app.get("/register", protAuth, function(req, res){
+    return res.render("register");
+});
+
+app.post("/user/new", protAuth, function(req, res){
+    mysqlConnection.query("insert into users (userName,password) value('" + req.body.userName + "','" + req.body.password +"')", function (err, result){
+        if(err) {
+            return res.send('Something went wrong');
+        }else{
+            console.log(result);
+            req.session.userID = result.insertId;
+            console.log(req.session.userID);
+            return res.redirect('/todos');
+        }
+    });
+});
+
+
+
+app.get("/todos", prot, function (req, res){
     var todoList;
     mysqlConnection.query(getTodoListAll, function(err, result){
         res.render("index", {todoList: result, userName: "Lawal"});
     });
 });
 
-app.post("/new", function(req, res){
+app.post("/new", prot, function(req, res){
     var query = "INSERT INTO lists (title, status) value('" + req.body.todo_title+"',1)"
     mysqlConnection.query(query, function (err, result){
         if(err) throw err;
 
-        res.redirect("/");
+        return res.redirect("/todos");
     })
 });
 
-app.post("/remove/:todoID", function(req, res){
+app.post("/remove/:todoID", prot, function(req, res){
     mysqlConnection.query("update lists set status = 0 where id = " + req.params.todoID, function (err, result){
         if(err) throw err ;
 
@@ -52,10 +116,16 @@ app.get("/install", function(req, res){
     var result;
 
     mysqlConnection.query(tableCreateList, function(err, res){
-        result = err ? err : res;
+        if (err) throw err;
+        mysqlConnection.query(tableCreateUser, function (err){
+            if(err) throw err;
+            mysqlConnection.query(addForeignKeyToList, function(err){
+                if(err) throw err;
+            })
+        })
     });
 
-    res.send(result);
+    res.redirect('/');
 });
 
 app.listen(3000, function(){
