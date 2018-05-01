@@ -114,6 +114,11 @@ app.post("/remove/:todoID", prot, function(req, res){
     })
 });
 
+app.get('/logout', function(req, res){
+    req.session.userID = false;
+    return res.redirect('/');
+})
+
 app.get("/install", function(req, res){
     var result;
 
