@@ -22,7 +22,7 @@ const mysqlConnection = mysql.createConnection({
 const tableCreateList = "CREATE TABLE lists(id int not null auto_increment primary key, title text, description text, status boolean)";
 const tableCreateUser = "CREATE TABLE users(id int not null auto_increment primary key, userName varchar(15), password varchar(30))";
 const addForeignKeyToList = "ALTER TABLE `lists` add `user_id` int unsigned NOT NULL";
-const getTodoListAll = "SELECT id,title,description from lists where status is true";
+const getTodoListAll = "SELECT id,title,description from lists where status is true and user_id = ";
 
 try{
     mysqlConnection.connect();
@@ -44,7 +44,6 @@ var prot = function(req, res, next){
 }
 
 var protAuth = function(req, res, next){
-    console.log(req.session.userID);
     if(req.session.userID){
         return res.redirect("/todos");
     }
@@ -90,13 +89,16 @@ app.post("/user/new", protAuth, function(req, res){
 
 app.get("/todos", prot, function (req, res){
     var todoList;
-    mysqlConnection.query(getTodoListAll, function(err, result){
-        res.render("index", {todoList: result, userName: "Lawal"});
+    mysqlConnection.query(getTodoListAll + req.session.userID, function(err, result){
+        mysqlConnection.query("select userName from users where id = " + req.session.userID, function (err, user){
+            if(err) return res.send(err);
+            res.render("index", {todoList: result, userName: user[0].userName});
+        });
     });
 });
 
 app.post("/new", prot, function(req, res){
-    var query = "INSERT INTO lists (title, status) value('" + req.body.todo_title+"',1)"
+    var query = "INSERT INTO lists (title, status,user_id) value('" + req.body.todo_title+"',1,"+req.session.userID+")"
     mysqlConnection.query(query, function (err, result){
         if(err) throw err;
 
