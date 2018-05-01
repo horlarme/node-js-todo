@@ -12,6 +12,8 @@ app.use(session({
     resave: false
 }));
 
+app.use("/public", server.static(__dirname + "/public"));
+
 const mysqlConnection = mysql.createConnection({
     host: "localhost",
     user: "root",

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Todo Lists</title>
+    <link rel="stylesheet"
+          href="/public/material/material.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body class="mdc-typography">
+    <h1 class="mdc-typography--display2">Log In</h1>
+    <% if(err){ %>
+        <h4><%= err %></h4>
+    <% } %>
+    <form action="/" method="post">
+        <input name="userName" class="mdc-text-field__input" placeholder="UserName"/><br />
+        <input type="password" class="mdc-text-field__input" name="password" placeholder="Password"/><br />
+        <input type="submit" value="Log In">
+    </form>
+    <a href="/register">Register</a>
+    <script src="/public/material/material.js"></script>
+    <script>mdc.autoInit()</script>
+</body>
+</html>

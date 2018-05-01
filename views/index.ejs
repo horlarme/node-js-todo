@@ -4,12 +4,14 @@
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Todo Lists</title>
+    <link rel="stylesheet"
+          href="node_modules/material-components-web/dist/material-components-web.css">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
-<body>
-    <h1><%= userName %>'s Todo List</h1>
+<body class="mdc-typography">
+        <h1 class="mdc-typography--display2"><%= userName %>'s Todo List</h1>
     <form action="/new" method="post">
-        <input name="todo_title" placeholder="Title"/><br />
+        <input  class="mdc-text-field__input" name="todo_title" placeholder="Title"/><br />
         <input type="submit" value="Save New">
     </form>
     <hr />
@@ -25,5 +27,7 @@
     </ul>
     <hr />
     <a href="/logout">Log Out</a>
+    <script src="node_modules/material-components-web/dist/material-components-web.js"></script>
+    <script>mdc.autoInit()</script>
 </body>
 </html>
